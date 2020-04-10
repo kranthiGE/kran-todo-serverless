@@ -1,0 +1,19 @@
+{
+  "name": "kran-todo-serverless",
+  "version": "1.0.0",
+  "description": "TODO app deployed on AWS using serverless framework. Uses Lambda, API Gateway, DynamoDB services",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "lambda",
+    "api",
+    "apigateway",
+    "dynamodb",
+    "nosql",
+    "aws"
+  ],
+  "author": "Kranthi Kiran",
+  "license": "ISC"
+}
