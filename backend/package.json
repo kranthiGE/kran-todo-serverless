@@ -7,8 +7,11 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "i": "^0.3.6",
+    "jsonwebtoken": "^8.5.1",
     "source-map-support": "^0.5.10",
-    "uuid": "^3.3.2"
+    "uuid": "^3.3.2",
+    "winston": "^3.2.1"
   },
   "keywords": [
     "lambda",
@@ -22,6 +25,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.48",
+    "@types/jsonwebtoken": "^8.3.9",
     "@types/node": "^10.17.19",
     "@types/uuid": "^7.0.2",
     "aws-sdk": "^2.656.0",

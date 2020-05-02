@@ -1,26 +1,28 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
-import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import * as AWS from 'aws-sdk'
 import * as utils from '../../utils/common'
 import { fetchJwtTokenFromHeader, getUserId } from '../../utils/common'
+import { createLogger } from '../../utils/logger'
 
 const docClient = new AWS.DynamoDB.DocumentClient()
-const todo_table = process.env.TODO_TABLE
+const todoTable = process.env.TODO_TABLE
+
+const logger = createLogger('deleteTodo')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    const updateTodo: UpdateTodoRequest = JSON.parse(event.body)
-
-    console.log(`input object ${updateTodo}`)
 
     // read the query param for todoId
     const todoId = event.pathParameters.todoId
-    console.log(`todoId ${todoId}`)
+    logger.info('Delete lambda called', {
+        todoId: todoId
+    })
 
     // get logged-in user id
     const userId = getUserId(fetchJwtTokenFromHeader(event.headers.Authorization))
-    console.log(`user id: ${userId}`)
-
+    logger.debug('Delete lambda called', {
+        todoId: todoId
+    })
     // check if an object exists matching to the name
     const validTodoId = await utils.todoIdExists(todoId, userId)
 
@@ -36,31 +38,15 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
           }
     }
 
-    const updatedDate = new Date().toISOString();
-    // if exists then update
+    // if exists then delete
     const params = {
-        TableName: todo_table,
+        TableName: todoTable,
         Key: {
             createdBy: userId,
             todoId: todoId
-        },
-        UpdateExpression: "set #todoName = :n, dueDate = :du, done = :d, updatedAt = :ud, attachmentUrl = :aurl",
-        ExpressionAttributeValues: {
-            ":n": updateTodo.name,
-            ":du": updateTodo.dueDate,
-            ":d": updateTodo.done,
-            ":ud": updatedDate,
-            ":aurl": updateTodo.attachmentUrl
-        },
-        ExpressionAttributeNames: {
-            "#todoName": "name"
-        },
-        ReturnValues: "UPDATED_NEW"
+        }
     }
-
-    console.log(`params: ${JSON.stringify(params)}`)
-
-    await docClient.update(
+    await docClient.delete(
         params, function(err, data){
             if(err){
                 return {
@@ -68,10 +54,13 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
                     headers: {
                       'Access-Control-Allow-Origin': '*'
                     },
-                    body: "Update failed: " + JSON.stringify(err)
+                    body: "delete failed: " + JSON.stringify(err)
                   }
             } else {
-                console.log(`update succeeded: ${data}`)
+                console.log(`: ${data}`)
+                logger.debug('delete succeeded ', {
+                    data: data
+                })
             }
         }
     ).promise()
@@ -82,7 +71,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
             'Access-Control-Allow-Origin': '*'
         },
         body: JSON.stringify({
-            message: "Update succeeded"
+            message: "Delete succeeded"
         })
     }
 }

@@ -14,12 +14,14 @@
       },
       "attachmentUrl": {
         "type": "string"
+      },
+      "createdBy": {
+        "type": "string"
       }
     },
     "required": [
       "name",
-      "dueDate",
-      "done"
+      "dueDate"
     ],
     "additionalProperties": false
   }
