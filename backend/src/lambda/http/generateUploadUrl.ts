@@ -2,6 +2,7 @@ import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
 import * as AWS from 'aws-sdk'
 import { fetchJwtTokenFromHeader, getUserId, todoIdExists } from '../../utils/common'
+import { createLogger } from '../../utils/logger'
 
 const s3 = new AWS.S3({
     signatureVersion: 'v4'
@@ -10,15 +11,17 @@ const s3 = new AWS.S3({
 const bucketName = process.env.TODO_IMAGES_S3_BUCKET
 const urlExpiration = process.env.SIGNED_URL_EXPIRATION
 
+const logger = createLogger('generateUploadUrl')
+
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-    console.log('generating upload URL')
+    logger.info('generating upload URL')
     // read the query param for todoId
     const todoId = event.pathParameters.todoId
-    console.log(`todoId ${todoId}`)
+    logger.debug(`todoId ${todoId}`)
 
     // get logged-in user id
     const userId = getUserId(fetchJwtTokenFromHeader(event.headers.Authorization))
-    console.log(`user id: ${userId}`)
+    logger.debug(`user id: ${userId}`)
 
     // check if an object exists matching to the name
     const validTodoId = await todoIdExists(todoId, userId)
@@ -50,11 +53,11 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
 }
 
 function getUploadUrl(todoId: string) {
-    console.log(`bucket: ${bucketName}`)
-    console.log(`urlExpiration: ${urlExpiration}`)
+    logger.debug(`bucket: ${bucketName}`)
+    logger.debug(`urlExpiration: ${urlExpiration}`)
 
     if(!urlExpiration){
-        console.log('No urlExpiration specified')
+        logger.error('No urlExpiration specified')
         return undefined
     }
 

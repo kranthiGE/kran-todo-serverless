@@ -4,22 +4,24 @@ import { UpdateTodoRequest } from '../../requests/UpdateTodoRequest'
 import * as AWS from 'aws-sdk'
 import * as utils from '../../utils/common'
 import { fetchJwtTokenFromHeader, getUserId } from '../../utils/common'
+import { createLogger } from '../../utils/logger'
 
 const docClient = new AWS.DynamoDB.DocumentClient()
 const todo_table = process.env.TODO_TABLE
+const logger = createLogger('updateTodo')
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const updateTodo: UpdateTodoRequest = JSON.parse(event.body)
 
-    console.log(`input object ${updateTodo}`)
+    logger.info(`input object ${updateTodo}`)
 
     // read the query param for todoId
     const todoId = event.pathParameters.todoId
-    console.log(`todoId ${todoId}`)
+    logger.debug(`todoId ${todoId}`)
 
     // get logged-in user id
     const userId = getUserId(fetchJwtTokenFromHeader(event.headers.Authorization))
-    console.log(`user id: ${userId}`)
+    logger.debug(`user id: ${userId}`)
 
     // check if an object exists matching to the name
     const validTodoId = await utils.todoIdExists(todoId, userId)
@@ -58,7 +60,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         ReturnValues: "UPDATED_NEW"
     }
 
-    console.log(`params: ${JSON.stringify(params)}`)
+    logger.debug(`params: ${JSON.stringify(params)}`)
 
     await docClient.update(
         params, function(err, data){

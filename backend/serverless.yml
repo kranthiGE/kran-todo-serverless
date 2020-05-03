@@ -25,6 +25,8 @@ provider:
     AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
     AUTH_0_SECRET_ID: Auth0Secret-${self:provider.stage}
     AUTH_0_SECRET_VALUE: auth0Secret
+    RS_AUTH_0_CERT_ID: RS-Auth0Cert-${self:provider.stage}
+    RS_AUTH_0_CERT_VALUE: rs-auth0Cert
     TODO_IMAGES_S3_BUCKET: kran-todo-images-${self:provider.stage}
     SIGNED_URL_EXPIRATION: 300
 
@@ -46,6 +48,10 @@ provider:
       Action:
         - secretsmanager:GetSecretValue
       Resource: !Ref Auth0Secret
+    - Effect: Allow
+      Action:
+        - secretsmanager:GetSecretValue
+      Resource: !Ref RsAuth0Secret
     - Effect: Allow
       Action:
         - kms:Decrypt
@@ -73,6 +79,9 @@ custom:
 
 functions:
 
+  RS256Auth:
+    handler: src/lambda/auth/rs256Auth0Authorizer.handler
+
   Auth:
     handler: src/lambda/auth/auth0Authorizer.handler
   
@@ -91,7 +100,7 @@ functions:
           method: post
           path: todos
           cors: true
-          authorizer: Auth
+          authorizer: RS256Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Create a new todo
@@ -106,7 +115,7 @@ functions:
           method: put
           path: todos/{todoId}
           cors: true
-          authorizer: Auth
+          authorizer: RS256Auth
           reqValidatorName: RequestBodyValidator
           documentation:
             summary: Update a todo item
@@ -121,7 +130,7 @@ functions:
           method: delete
           path: todos/{todoId}
           cors: true
-          authorizer: Auth
+          authorizer: RS256Auth
           documentation:
             summary: Delete a todo item
             description: Delete a todo item
@@ -133,7 +142,7 @@ functions:
           method: post
           path: todos/{todoId}/attachment
           cors: true
-          authorizer: Auth
+          authorizer: RS256Auth
           documentation:
             summary: generate upload url
             description: generate S3 upload url for a todo item
@@ -252,4 +261,10 @@ resources:
       Properties:
         Name: ${self:provider.environment.AUTH_0_SECRET_ID}
         Description: Auth0 secret
+        KmsKeyId: !Ref KMSKey
+    RsAuth0Secret:
+      Type: AWS::SecretsManager::Secret
+      Properties:
+        Name: ${self:provider.environment.RS_AUTH_0_CERT_ID}
+        Description: RS256 algorithm Auth0 cert
         KmsKeyId: !Ref KMSKey

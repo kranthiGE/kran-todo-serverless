@@ -57,7 +57,6 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
                     body: "delete failed: " + JSON.stringify(err)
                   }
             } else {
-                console.log(`: ${data}`)
                 logger.debug('delete succeeded ', {
                     data: data
                 })
