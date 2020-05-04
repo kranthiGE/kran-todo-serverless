@@ -24,4 +24,7 @@ sls deploy -v --aws-profile serverless
 ```bash
 sls plugin install --name serverless-aws-documentation
 sls plugin install --name serverless-reqvalidator-plugin
+sls plugin install --name serverless-iam-roles-per-function
+sls plugin install --name serverless-dynamodb-local
+sls plugin install --name serverless-offline
 ```

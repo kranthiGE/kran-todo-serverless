@@ -14,7 +14,7 @@ export async function getSecret(secretIdParam: string){
         SecretId: secretIdParam
     }).promise()
 
-    logger.info('fetched secret value')
+    logger.info('fetched secret value', data)
 
     return JSON.parse(data.SecretString)
 }
