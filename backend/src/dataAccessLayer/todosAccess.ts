@@ -41,27 +41,25 @@ export class TodosAccess {
         return todo
     }
 
-    async deleteTodo(userId: string, todoId: string){
+    async deleteTodo(todoId: string, userId: string){
         logger.info('deleting an item for ', {
             todoId: todoId,
             userId: userId
         })
-        // if exists then delete
         const params = {
             TableName: this.todoTable,
             Key: {
                 createdBy: userId,
                 todoId: todoId
-            },
-            ReturnValues: 'ALL_OLD'
+            }
         }
-
         await this.docClient.delete(
             params, function(err, data){
                 if(err){
                     logger.error(err)
                     throw new Error(err.message)
                 } else {
+                    console.log(`: ${data}`)
                     logger.debug('delete succeeded ', {
                         data: data
                     })

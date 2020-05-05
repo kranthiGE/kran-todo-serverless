@@ -1,12 +1,8 @@
 import 'source-map-support/register'
 import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } from 'aws-lambda'
-import * as AWS from 'aws-sdk'
-import * as utils from '../../utils/common'
 import { fetchJwtTokenFromHeader, getUserId } from '../../utils/common'
 import { createLogger } from '../../utils/logger'
-
-const docClient = new AWS.DynamoDB.DocumentClient()
-const todoTable = process.env.TODO_TABLE
+import { todoIdExists, deleteTodoItem } from '../../businessLogic/todos'
 
 const logger = createLogger('deleteTodo')
 
@@ -24,7 +20,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         todoId: todoId
     })
     // check if an object exists matching to the name
-    const validTodoId = await utils.todoIdExists(todoId, userId)
+    const validTodoId = await todoIdExists(todoId, userId)
 
     if(!validTodoId){
         return {
@@ -39,31 +35,18 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     }
 
     // if exists then delete
-    const params = {
-        TableName: todoTable,
-        Key: {
-            createdBy: userId,
-            todoId: todoId
+    try{
+        deleteTodoItem(todoId, userId)
+    }
+    catch(err){
+        return {
+            statusCode: 500,
+            headers: {
+            'Access-Control-Allow-Origin': '*'
+            },
+            body: "delete failed: " + JSON.stringify(err)
         }
     }
-    await docClient.delete(
-        params, function(err, data){
-            if(err){
-                return {
-                    statusCode: 500,
-                    headers: {
-                      'Access-Control-Allow-Origin': '*'
-                    },
-                    body: "delete failed: " + JSON.stringify(err)
-                  }
-            } else {
-                console.log(`: ${data}`)
-                logger.debug('delete succeeded ', {
-                    data: data
-                })
-            }
-        }
-    ).promise()
 
     return {
         statusCode: 200,

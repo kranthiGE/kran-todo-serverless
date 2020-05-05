@@ -58,7 +58,7 @@ custom:
   documentation:
     api:
       info:
-        version: v1.4.9
+        version: v1.4.12
         title: kran-todo-serverless-app API
         description: serverless app for TODO
     models:

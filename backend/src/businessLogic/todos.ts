@@ -67,7 +67,12 @@ export async function deleteTodoItem(
     todoId: string,
     userId: string    
 ){
-    todosAccess.deleteTodo(todoId, userId)
+    try{
+        todosAccess.deleteTodo(todoId, userId)
+    }
+    catch(err){
+        throw new Error(err)
+    }
 }
 
 export async function updateTodoItem(
