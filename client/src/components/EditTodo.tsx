@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Form, Button } from 'semantic-ui-react'
 import Auth from '../auth/Auth'
-import { getUploadUrl, uploadFile } from '../api/todos-api'
+import { getUploadUrl, uploadFile, putTodoImage } from '../api/todos-api'
 
 enum UploadState {
   NoUpload,
@@ -55,12 +55,21 @@ export class EditTodo extends React.PureComponent<
 
       this.setUploadState(UploadState.UploadingFile)
       await uploadFile(uploadUrl, this.state.file)
-
-      alert('File was uploaded!')
+      await this.updateFileUrl(this.props.match.params.todoId)
+      
+      alert('File was uploaded & added to todo item!')
     } catch (e) {
       alert('Could not upload a file: ' + e.message)
     } finally {
       this.setUploadState(UploadState.NoUpload)
+    }
+  }
+
+  async updateFileUrl(todoId: string){
+    try {
+      await putTodoImage(this.props.auth.getIdToken(), todoId)
+    } catch {
+      alert('Todo update image url failed')
     }
   }
 

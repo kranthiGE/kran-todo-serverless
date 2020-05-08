@@ -43,6 +43,18 @@ export async function patchTodo(
   })
 }
 
+export async function putTodoImage(
+  idToken: string,
+  todoId: string
+): Promise<void> {
+  await Axios.post(`${apiEndpoint}/todos/image/${todoId}`, '', {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${idToken}`
+    }
+  })
+}
+
 export async function deleteTodo(
   idToken: string,
   todoId: string

@@ -31,6 +31,7 @@ provider:
     RS_AUTH_0_CERT_ID: RS-Auth0Cert-${self:provider.stage}
     RS_AUTH_0_CERT_VALUE: rs-auth0Cert
     TODO_IMAGES_S3_BUCKET: kran-todo-images-${self:provider.stage}
+    TODO_APP_REGION: ${self:provider.region}
     SIGNED_URL_EXPIRATION: 300
 
   iamRoleStatements:
@@ -58,7 +59,7 @@ custom:
   documentation:
     api:
       info:
-        version: v1.4.12
+        version: v1.4.13
         title: kran-todo-serverless-app API
         description: serverless app for TODO
     models:
@@ -138,6 +139,26 @@ functions:
             description: Update a todo item
             requestModels:
               'application/json': TodoRequest
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:GetItem
+          - dynamodb:Query
+          - dynamodb:UpdateItem
+        Resource: arn:aws:dynamodb:${self:provider.region}:*:table/${self:provider.environment.TODO_TABLE}
+
+  UpdateTodoImageUrl:
+    handler: src/lambda/http/updateTodoImageUrl.handler
+    events:
+      - http:
+          method: post
+          path: todos/image/{todoId}
+          cors: true
+          authorizer: RS256Auth
+          reqValidatorName: RequestBodyValidator
+          documentation:
+            summary: Update a todo item's attachment URL
+            description: Update a todo item's attachment URL
     iamRoleStatements:
       - Effect: Allow
         Action:

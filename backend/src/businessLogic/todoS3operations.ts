@@ -7,6 +7,7 @@ const s3 = new AWS.S3({
 
 const bucketName = process.env.TODO_IMAGES_S3_BUCKET
 const urlExpiration = process.env.SIGNED_URL_EXPIRATION
+const awsRegion = process.env.TODO_APP_REGION
 
 const logger = createLogger('todoS3Operations')
 
@@ -25,4 +26,8 @@ export function getUploadUrl(todoId: string) {
         Key: todoId,
         Expires: urlExpirationValue
     })
+}
+
+export function getImageUrlAsStoredInS3(todoId: string){
+    return `https://${bucketName}.s3.${awsRegion}.amazonaws.com/${todoId}`
 }

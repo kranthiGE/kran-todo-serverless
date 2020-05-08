@@ -86,6 +86,40 @@ export class TodosAccess {
         .promise()
     }
 
+    async updateTodoAttachmentUrl(todoId: string, userId: string, attachmentUrl: string){
+        logger.info('in updateTodoAttachmentUrl')
+        const updatedDate = new Date().toISOString();
+
+        // if exists then update
+        const params = {
+            TableName: this.todoTable,
+            Key: {
+                createdBy: userId,
+                todoId: todoId
+            },
+            UpdateExpression: "set updatedAt = :ud, attachmentUrl = :aurl",
+            ExpressionAttributeValues: {
+                ":ud": updatedDate,
+                ":aurl": attachmentUrl
+            },
+            ReturnValues: "UPDATED_NEW"
+        }
+        logger.debug(`params: ${JSON.stringify(params)}`)
+
+        await this.docClient.update(
+            params, function(err, data){
+                if(err){
+                    logger.error(err)
+                    throw new Error(err.message)
+                } else {
+                    console.log(`update succeeded: ${data}`)
+                }
+            }
+        ).promise()
+        logger.info('updated attachment URL successfully ')
+
+    }
+
     async updateTodoItem(todo: Todo, userId: string){
         logger.info('update new todo item')
         const updatedDate = new Date().toISOString();

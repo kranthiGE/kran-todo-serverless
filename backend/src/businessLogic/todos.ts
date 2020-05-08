@@ -5,6 +5,7 @@ import { createLogger } from "../utils/logger"
 import * as uuid from 'uuid'
 import { CreateTodoRequest } from "../requests/CreateTodoRequest"
 import { UpdateTodoRequest } from "../requests/UpdateTodoRequest"
+import { getImageUrlAsStoredInS3 } from "./todoS3operations"
 
 const todosAccess = new TodosAccess()
 const logger = createLogger('todos')
@@ -96,6 +97,12 @@ export async function updateTodoItem(
     catch(err){
         throw new Error(err)
     }
+}
+
+export async function updateTodoAttachmentUrl(todoId: string, userId: string){
+    const attachmentUrl = getImageUrlAsStoredInS3(todoId)
+    logger.info(`generated image url on s3: ${attachmentUrl}`)
+    todosAccess.updateTodoAttachmentUrl(todoId, userId, attachmentUrl)
 }
 
 export async function todoIdExists(todoId: string, userId: string){
